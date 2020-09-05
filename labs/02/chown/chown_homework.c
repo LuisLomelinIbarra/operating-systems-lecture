@@ -17,10 +17,11 @@ int main(int argc, char *argv[]){
 	char *colon;
 	struct passwd *pwd;
 	struct group *grp;
-	if(argc==3 && argv[2][0]!='\0'){
+	if(argc==3)
+	if( argv[2][0]!='\0'){
 		/*
 		 *Averiguar si se tiene grupo; hay que
-		 checar si hay un : en el argv[1]
+		 checar si hay un : en el argv[2]
 		 si hay hay que dividir y hacer el sys call correcto
 		 sino hay que poner -1 a los indicados
 		 * */
