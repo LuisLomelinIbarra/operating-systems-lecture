@@ -10,3 +10,7 @@ clean:
 	rm -rf simple-thread-benchmark
 	rm -rf mutex-thread
 	rm -rf thread-benchmark-syscall
+	rm -rf calcPi
+pi:
+	gcc calcPi.c -o calcPi -lm -lpthread
+

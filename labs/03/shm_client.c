@@ -6,14 +6,13 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHMSZ     27
+#define SHMSZ     52
 
 main()
 {
     int shmid;
     key_t key;
     char *shm, *s;
-
     /*
      * We need to get the segment named
      * "5678", created by the server.
@@ -40,7 +39,7 @@ main()
      * Now read what the server put in the memory.
      */
     for (s = shm; *s != NULL; s++)
-        putchar(*s);
+        putchar((*s-'A')+'a');
     putchar('\n');
 
     /*

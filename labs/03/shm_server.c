@@ -3,7 +3,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHMSZ     27
+#define SHMSZ     52
 
 main()
 {
@@ -17,7 +17,6 @@ main()
      * "5678".
      */
     key = 5678;
-
     /*
      * Create the segment.
      */
@@ -40,7 +39,7 @@ main()
      */
     s = shm;
 
-    for (c = 'a'; c <= 'z'; c++)
+    for (c = 'A'; c <= 'Z'; c++)
         *s++ = c;
     *s = NULL;
 
