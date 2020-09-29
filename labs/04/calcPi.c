@@ -11,17 +11,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
-#define TH_NUM 1000 //the number of threads to use
-#define POINTNUM 100000000 //The number of points to use
+#define POINTNUM 10000000 //The number of points to use
 
 pthread_mutex_t mutsum;// A global mutex variable to get the sum
 
+//Clock Variables to take time
+clock_t start,end;
+
+// Important data to pass on to each thread
+typedef struct{
+	int nop; //Number of points to use in the calc
+	unsigned int *seed; // Random seed to use
+} thdata;
+
+//Variable to carry info for the cal.
+thdata tdat;
+
 //the total sum of points in
 int sumP;
+
 //Function to calculate if the point is in the circle
 double calDist(double x,double y){
-	return sqrt( pow(x,2) + pow(y,2) );
+	return sqrt( x*x + (y*y) );
 }
 
 /*
@@ -35,21 +48,23 @@ double calDist(double x,double y){
 
 
 
-void *calculatePoints(void *nop){
+void *calculatePoints(void *s){
 	double x,y,r;
-	int pointsin=0;
-	r=rand();
+	thdata *st;
+        st = (thdata *) s;
+	r=rand_r(st->seed);
 	int pin=0;
-	int n= (int) nop;
+	int n= st->nop;
 	for(int i=0; i<n;i++){
-		x=rand();
-		y=rand();
+		x=rand_r((st->seed));
+		y=rand_r((st->seed));
 		if(r<=calDist(x,y) ) pin++;
 	}
 	//printf("Hello I calculated: %d\n",pin);
 	pthread_mutex_lock(&mutsum);
 	sumP+=pin;
 	pthread_mutex_unlock(&mutsum);
+	//printf("Finished Mutex\n");
 	pthread_exit((void*) 0);
 
 
@@ -57,6 +72,12 @@ void *calculatePoints(void *nop){
 
 
 int main(int argc,char *argv[]){
+	
+	double timeused; // the time in seconds that it took to do the operation
+	int TH_NUM;
+	TH_NUM =(argc<2) ? 1:atoi(argv[1]); // Number of threads
+	
+	//printf("%d",TH_NUM);
 	pthread_t threads[TH_NUM]; //Setting the thread array
 	pthread_attr_t attr;
 	void* status;
@@ -64,8 +85,10 @@ int main(int argc,char *argv[]){
 	//printf("%d\n",nop);
 	int pin=0;
 	sumP=0;
-	srand(time(0));
-
+	start=clock();
+	tdat.nop=nop;
+	unsigned int tm = time(0);	
+	(tdat.seed)= &tm;
 
 	//Starting Mutex
 	pthread_mutex_init(&mutsum,NULL);
@@ -78,7 +101,8 @@ int main(int argc,char *argv[]){
 	//Calling all of the threads to work
 	
 	for(int i=0;i<TH_NUM;i++){
-		  pthread_create(&threads[i],&attr,calculatePoints,(void *)nop);
+		  pthread_create(&threads[i],&attr,calculatePoints,(void *)&tdat);
+		  *(tdat.seed)+=1;
 	}
 
 	pthread_attr_destroy(&attr);
@@ -89,10 +113,11 @@ int main(int argc,char *argv[]){
 	//pin=sumP;
 	//printf("\nPin: %d\n",sumP);
 	//Calculate Pi
-	double pi= 4.0* sumP/(POINTNUM*1.0); 
-
+	double pi= 4.0* (double) sumP/(double)POINTNUM; 
+	end=clock();
+	timeused = ((double)(end-start))/CLOCKS_PER_SEC;
 	//Print Results
-	printf("The value of Pi calculated by: \n- %d points\n- %d threads\nIs Pi = %f \n",POINTNUM,TH_NUM,pi);
+	printf("The value of Pi calculated by: \n- %d points\n- %d threads\nIs Pi = %f \nTime in used: %f s.\n",POINTNUM,TH_NUM,pi,timeused);
 	pthread_mutex_destroy(&mutsum);
 	pthread_exit(NULL);
 	return 0;
