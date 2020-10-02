@@ -4,6 +4,9 @@
  *	using threads
  *
  *	By: Luis Fernando Lomelín Ibarra A01177015
+ *	Link to Chart:shorturl.at/alDL4
+ *
+ *	Link to Repo: https://github.com/LuisLomelinIbarra/operating-systems-lecture
  * */
 
 
@@ -13,7 +16,7 @@
 #include <math.h>
 #include <time.h>
 
-#define POINTNUM 10000000 //The number of points to use
+#define POINTNUM 10000 //The number of points to use
 
 pthread_mutex_t mutsum;// A global mutex variable to get the sum
 
@@ -52,13 +55,12 @@ void *calculatePoints(void *s){
 	double x,y,r;
 	thdata *st;
         st = (thdata *) s;
-	r=rand_r(st->seed);
 	int pin=0;
 	int n= st->nop;
 	for(int i=0; i<n;i++){
-		x=rand_r((st->seed));
-		y=rand_r((st->seed));
-		if(r<=calDist(x,y) ) pin++;
+		x=rand_r((st->seed))/(double) RAND_MAX;
+		y=rand_r((st->seed))/(double) RAND_MAX;
+		if(calDist(x,y)< 1) pin++;
 	}
 	//printf("Hello I calculated: %d\n",pin);
 	pthread_mutex_lock(&mutsum);
